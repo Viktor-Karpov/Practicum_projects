@@ -1,42 +1,63 @@
-# A/B Test Audit & Statistical Hypothesis Testing
+# A/B-тест: аудит результатов и проверка гипотез
 
-Final project of the Yandex Practicum "Data Analyst" program (base course).
-Two independent studies in one notebook.
+Проект: статистический анализ данных сервиса
+Яндекс Книги в двух частях — сравнение активности пользователей двух городов
+и аудит A/B-теста новой платёжной воронки.
 
-## Part 1 — Hypothesis testing: Yandex Books
+## Задачи проекта
 
-- **Question:** do users from Saint Petersburg spend more time reading and
-  listening to books in the app than users from Moscow?
-- Checked user IDs for duplicates, compared group sizes, statistics and
-  distributions (histograms)
-- One-sided Welch's t-test on user-level activity time (alpha = 0.05)
-- **Result:** p-value = 0.3381 — no evidence that SPb users are more active;
-  discussed possible causes (activity mode mix, outliers) and noted that the
-  sample may lack power for a definitive answer
+### Часть 1. Активность пользователей в Москве и Санкт-Петербурге
 
-## Part 2 — A/B test audit: BitMotion Kit online store
+Проверить гипотезу о том, что пользователи Яндекс Книги в Москве проводят
+в приложении больше времени, чем пользователи в Санкт-Петербурге.
 
-- Audited the correctness of an A/B test of a new store interface:
-  - removed users who participated in several tests or groups at once
-  - checked group balance and intersections between groups
-  - limited the analysis horizon to the first 7 days after registration
-    (per the test specification)
-  - estimated the required sample size with the Evan Miller calculator
-- Metric: conversion to purchase (proportion) → two-proportion Z-test
-- **Result:** conversion increased significantly in the test group —
-  the new interface can be rolled out
+- **H₀:** среднее время чтения в двух городах не различается;
+- **H₁:** среднее время чтения различается;
+- **Метод:** двухвыборочный t-тест для независимых выборок (α = 0.05).
 
-## Data
+### Часть 2. Аудит A/B-теста новой платёжной воронки
 
-Datasets are provided by Yandex Practicum as part of the course materials
-and are not included in the repository. Part 2 datasets are loaded directly
-from the public Yandex S3 URLs in the code, so those cells run as-is.
+Оценить корректность проведённого A/B-теста новой механики оплаты и дать
+рекомендацию: стоит ли выкатывать новую воронку на всех пользователей.
 
-## Stack
+- Проверка условий корректности теста: пересечения групп, границы дат,
+  полнота событий воронки;
+- Расчёт конверсии на каждом шаге воронки и сравнение воронок по группам;
+- **Метод:** Z-тест для разности долей (α = 0.05).
 
-Python, pandas, matplotlib, seaborn, scipy (Welch's t-test),
-statsmodels (proportions_ztest)
+## Данные
 
-## How to run
+Данные загружаются в ноутбуке напрямую из публичного источника Яндекс
+Практикума, поэтому репозиторий полностью воспроизводим без дополнительных
+файлов:
 
-The notebook runs top-to-bottom in Jupyter or Google Colab.
+- `https://code.s3.yandex.net/datasets/yandex_knigi_data.csv` — время чтения
+  по городам;
+- `ab_test_participants.csv` — участники A/B-теста;
+- `ab_test_events.zip` — события воронки.
+
+Датасеты предоставлены Яндекс Практикумом; в репозиторий не входят.
+
+## Как запустить
+
+1. Склонировать репозиторий или открыть ноутбук в Google Colab;
+2. Выполнить все ячейки (Run all) — данные подтянутся автоматически.
+
+Требования: Python 3, pandas, matplotlib, scipy.
+
+## Структура проекта
+
+- `ab_test_audit.ipynb` — ноутбук с анализом и выводами.
+
+## Результаты
+
+**Часть 1.** В данных найдено и удалено 244 дубликата. t-статистика ≈ 0.4,
+p-value ≈ 0.3381 — больше уровня значимости, гипотезу H₀ не отвергаем:
+нет оснований утверждать, что пользователи Москвы проводят в приложении
+больше времени.
+
+**Часть 2.** Группы сбалансированы: 4952 и 5011 участников, из них
+1377 и 1480 покупателей. Z-тест показал p-value ниже уровня значимости —
+рост конверсии в тестовой группе статистически значим, новую механику
+оплаты можно рекомендовать к выкатке на всех пользователей.
+
